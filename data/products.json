@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "title": "iPhone 15",
+    "description": "Smartphone Apple última generación",
+    "code": "IPH15-001",
+    "price": 999.99,
+    "status": true,
+    "stock": 50,
+    "category": "Smartphones",
+    "thumbnails": [
+      "https://example.com/iphone1.jpg",
+      "https://example.com/iphone2.jpg"
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Samsung Galaxy S24",
+    "description": "Smartphone Samsung con cámara profesional",
+    "code": "SAM-S24-001",
+    "price": 849.99,
+    "status": true,
+    "stock": 30,
+    "category": "Smartphones",
+    "thumbnails": [
+      "https://example.com/samsung1.jpg"
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Laptop Gaming",
+    "description": "Laptop para juegos de alta gama",
+    "code": "LAP-GAM-001",
+    "price": 1299.99,
+    "status": true,
+    "stock": 15,
+    "category": "Computadoras",
+    "thumbnails": [
+      "https://example.com/laptop1.jpg"
+    ]
+  }
+]
