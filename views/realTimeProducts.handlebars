@@ -1,0 +1,66 @@
+<div class="container">
+    <h2>Gestión de Productos en Tiempo Real</h2>
+    
+    <!-- Formulario para agregar productos -->
+    <div class="add-product-form">
+        <h3>Agregar Nuevo Producto</h3>
+        <form id="productForm">
+            <div class="form-row">
+                <input type="text" id="title" placeholder="Título del producto" required>
+                <input type="text" id="category" placeholder="Categoría" required>
+            </div>
+            <div class="form-row">
+                <textarea id="description" placeholder="Descripción del producto" required></textarea>
+            </div>
+            <div class="form-row">
+                <input type="text" id="code" placeholder="Código único" required>
+                <input type="number" id="price" placeholder="Precio" step="0.01" required>
+                <input type="number" id="stock" placeholder="Stock" required>
+            </div>
+            <div class="form-row">
+                <input type="url" id="thumbnail" placeholder="URL de imagen (opcional)">
+                <label>
+                    <input type="checkbox" id="status" checked> Producto activo
+                </label>
+            </div>
+            <button type="submit">Agregar Producto</button>
+        </form>
+    </div>
+
+    <!-- Lista de productos en tiempo real -->
+    <div class="products-section">
+        <h3>Productos (Tiempo Real)</h3>
+        <div id="productsContainer">
+            {{#if products.length}}
+                <div class="products-grid">
+                    {{#each products}}
+                    <div class="product-card" data-id="{{this.id}}">
+                        <h4>{{this.title}}</h4>
+                        <p class="description">{{this.description}}</p>
+                        <div class="product-info">
+                            <span class="price">${{this.price}}</span>
+                            <span class="stock">Stock: {{this.stock}}</span>
+                            <span class="category">{{this.category}}</span>
+                        </div>
+                        <p class="code">Código: {{this.code}}</p>
+                        {{#if this.status}}
+                            <span class="status available">Disponible</span>
+                        {{else}}
+                            <span class="status unavailable">No disponible</span>
+                        {{/if}}
+                        <button class="delete-btn" onclick="deleteProduct('{{this.id}}')">
+                            Eliminar
+                        </button>
+                    </div>
+                    {{/each}}
+                </div>
+            {{else}}
+                <div class="no-products">
+                    <p>No hay productos. ¡Agrega el primero usando el formulario!</p>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<script src="/js/realTimeProducts.js"></script>
