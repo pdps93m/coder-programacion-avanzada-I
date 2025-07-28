@@ -1,22 +1,16 @@
-// Conectar con Socket.io
 const socket = io();
 
-// Referencias al DOM
 const productForm = document.getElementById('productForm');
 const productsContainer = document.getElementById('productsContainer');
 
-// Conectar con el servidor
 socket.on('connect', () => {
-    // Solicitar lista inicial de productos
     socket.emit('requestProducts');
 });
 
-// Escuchar cuando llegan productos actualizados
 socket.on('updateProducts', (products) => {
     renderProducts(products);
 });
 
-// Escuchar mensajes del servidor
 socket.on('productAdded', (product) => {
     showNotification(`Producto "${product.title}" agregado exitosamente`, 'success');
 });
@@ -30,11 +24,9 @@ socket.on('error', (error) => {
     showNotification(error.message, 'error');
 });
 
-// Manejar envío del formulario
 productForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    // Recopilar datos del formulario
     const formData = {
         title: document.getElementById('title').value,
         description: document.getElementById('description').value,
@@ -46,22 +38,18 @@ productForm.addEventListener('submit', (e) => {
         thumbnails: document.getElementById('thumbnail').value ? [document.getElementById('thumbnail').value] : []
     };
     
-    // Enviar via WebSocket
     socket.emit('addProduct', formData);
     
-    // Limpiar formulario
     productForm.reset();
-    document.getElementById('status').checked = true; // Reset checkbox
+    document.getElementById('status').checked = true;
 });
 
-// Función para eliminar producto
 function deleteProduct(productId) {
     if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
         socket.emit('deleteProduct', productId);
     }
 }
 
-// Función para renderizar productos en el DOM
 function renderProducts(products) {
     if (!products || products.length === 0) {
         productsContainer.innerHTML = `
@@ -87,7 +75,7 @@ function renderProducts(products) {
                 '<span class="status unavailable">No disponible</span>'
             }
             <button class="delete-btn" onclick="deleteProduct('${product.id}')">
-                🗑️ Eliminar
+                Eliminar
             </button>
         </div>
     `).join('');
@@ -99,14 +87,11 @@ function renderProducts(products) {
     `;
 }
 
-// Función para mostrar notificaciones
 function showNotification(message, type = 'info') {
-    // Crear elemento de notificación
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
     
-    // Estilos básicos
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -122,17 +107,14 @@ function showNotification(message, type = 'info') {
         ${type === 'info' ? 'background: #17a2b8;' : ''}
     `;
     
-    // Agregar al DOM
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// CSS para animaciones (se agrega dinámicamente)
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {

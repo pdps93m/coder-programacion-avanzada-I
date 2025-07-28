@@ -5,13 +5,11 @@ const { engine } = require('express-handlebars');
 const { Server } = require('socket.io');
 const http = require('http');
 
-// Configuracion del servidor
 const app = express();
 const PORT = 8080;
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Configurar Handlebars, antes de usar views
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './views');
@@ -19,26 +17,21 @@ app.set('views', './views');
 app.use(express.json());
 app.use(express.static('public'));
 
-
 const productManager = new ProductManager('./data/products.json');
 const cartManager = new CartManager('./data/carts.json');
 
-// Importar routers
 const viewsRouter = require('./src/routes/views.router');
 const productsRouter = require('./src/routes/products');
 const cartsRouter = require('./src/routes/carts');
 
-// Configurar rutas
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 
-// Iniciar servidor
 server.listen(PORT, () => {
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
 
-// Configuración Socket.io
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
 
