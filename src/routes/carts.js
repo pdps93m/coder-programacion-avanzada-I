@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /:cid - Obtener productos del carrito
+// GET Obtener productos del carrito
 router.get('/:cid', async (req, res) => {
     try {
         const { cid } = req.params;
@@ -47,12 +47,12 @@ router.get('/:cid', async (req, res) => {
     }
 });
 
-// POST /:cid/product/:pid - Agregar producto al carrito
+// POST - Agregar producto al carrito
 router.post('/:cid/product/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         
-        // Verificar que el producto existe
+        // Verifica que el producto existe
         const product = await productManager.getProductById(pid);
         if (!product) {
             return res.status(404).json({

@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /realtimeproducts - Vista dinámica con WebSockets
+// GET  - Vista dinámica con WebSockets
 router.get('/realtimeproducts', async (req, res) => {
     try {
         const products = await productManager.getProducts();

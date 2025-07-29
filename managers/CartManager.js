@@ -78,10 +78,10 @@ class CartManager {
             const existingProduct = cart.products.find(p => p.product == productId);
 
             if (existingProduct) {
-                // Si el producto ya existe, incrementar quantity
+                // Si el producto ya existe, incrementar cantidad
                 existingProduct.quantity += 1;
             } else {
-                // Si no existe, agregarlo con quantity 1
+                // Si no existe, agregarlo con cantidad 1
                 cart.products.push({
                     product: productId.toString(),
                     quantity: 1

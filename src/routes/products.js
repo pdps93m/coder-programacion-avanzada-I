@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /:pid - Obtener producto por ID
+// GET - Obtener producto por ID
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -45,7 +45,7 @@ router.get('/:pid', async (req, res) => {
     }
 });
 
-// POST / - Agregar nuevo producto
+// POST - Agregar nuevo producto
 router.post('/', async (req, res) => {
     try {
         const product = await productManager.addProduct(req.body);
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /:pid - Actualizar producto
+// PUT - Actualizar producto
 router.put('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -87,7 +87,7 @@ router.put('/:pid', async (req, res) => {
     }
 });
 
-// DELETE /:pid - Eliminar producto
+// DELETE - Eliminar producto
 router.delete('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
