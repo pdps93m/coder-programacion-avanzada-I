@@ -1,0 +1,310 @@
+{{!-- Vista de Estudiantes con Paginación --}}
+<div class="container">
+    <h2>🎓 Estudiantes con Paginación</h2>
+    
+    {{!-- SECCIÓN 1: ESTADÍSTICAS RÁPIDAS --}}
+    <div class="stats-section">
+        <h3>📊 Estadísticas por Curso</h3>
+        <div class="stats-grid">
+            {{#each estadisticas}}
+            <div class="stat-card">
+                <h4>{{this._id}}</h4>
+                <p class="stat-number">{{this.cantidad}} estudiantes</p>
+                <p class="stat-detail">Edad promedio: {{this.edadPromedio}} años</p>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    {{!-- SECCIÓN 2: FILTROS Y CONTROLES --}}
+    <div class="controls-section">
+        <h3>🔍 Filtrar por Curso</h3>
+        <div class="filter-buttons">
+            <a href="{{pagination.todosUrl}}" class="filter-btn {{#unless currentQuery}}active{{/unless}}">
+                Todos los Cursos
+            </a>
+            <a href="{{pagination.inicialUrl}}" class="filter-btn {{#if isInicial}}active{{/if}}">
+                Inicial
+            </a>
+            <a href="{{pagination.medioUrl}}" class="filter-btn {{#if isMedio}}active{{/if}}">
+                Medio
+            </a>
+            <a href="{{pagination.avanzadoUrl}}" class="filter-btn {{#if isAvanzado}}active{{/if}}">
+                Avanzado
+            </a>
+        </div>
+        
+        {{!-- ORDENAMIENTO --}}
+        <div class="sort-controls">
+            <span>Ordenar por edad:</span>
+            <a href="/students-view?page={{pagination.currentPage}}&limit={{currentLimit}}&sort=asc&query={{currentQuery}}" 
+               class="sort-btn {{#ifEquals currentSort 'asc'}}active{{/ifEquals}}">
+                Menor a Mayor
+            </a>
+            <a href="/students-view?page={{pagination.currentPage}}&limit={{currentLimit}}&sort=desc&query={{currentQuery}}" 
+               class="sort-btn {{#ifEquals currentSort 'desc'}}active{{/ifEquals}}">
+                Mayor a Menor
+            </a>
+        </div>
+    </div>
+
+    {{!-- SECCIÓN 3: INFORMACIÓN DE PAGINACIÓN --}}
+    <div class="pagination-info">
+        <p>
+            📄 Mostrando página <strong>{{pagination.currentPage}}</strong> de <strong>{{pagination.totalPages}}</strong>
+            ({{pagination.totalStudents}} estudiantes total)
+        </p>
+    </div>
+
+    {{!-- SECCIÓN 4: LISTA DE ESTUDIANTES --}}
+    <div class="students-section">
+        {{#if students.length}}
+            <div class="students-grid">
+                {{#each students}}
+                <div class="student-card">
+                    <div class="student-header">
+                        <h4>{{this.nombre}} {{this.apellido}}</h4>
+                        <span class="curso-badge curso-{{this.curso}}">{{this.curso}}</span>
+                    </div>
+                    <div class="student-info">
+                        <p><strong>Edad:</strong> {{this.edad}} años</p>
+                        <p><strong>Email:</strong> {{this.email}}</p>
+                        <p><strong>Inscripción:</strong> {{this.fechaInscripcion}}</p>
+                        {{#if this.activo}}
+                            <span class="status active">✅ Activo</span>
+                        {{else}}
+                            <span class="status inactive">❌ Inactivo</span>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        {{else}}
+            {{#if error}}
+                <div class="error-message">
+                    <p>❌ {{error}}</p>
+                </div>
+            {{else}}
+                <div class="no-students">
+                    <p>No se encontraron estudiantes con los filtros aplicados.</p>
+                    <a href="/students-view" class="btn">Ver todos los estudiantes</a>
+                </div>
+            {{/if}}
+        {{/if}}
+    </div>
+
+    {{!-- SECCIÓN 5: NAVEGACIÓN DE PÁGINAS --}}
+    {{#if pagination.totalPages}}
+    <div class="pagination-navigation">
+        {{!-- Botón Anterior --}}
+        {{#if pagination.hasPrevPage}}
+            <a href="{{pagination.prevUrl}}" class="nav-btn prev-btn">
+                ⬅️ Anterior
+            </a>
+        {{else}}
+            <span class="nav-btn prev-btn disabled">⬅️ Anterior</span>
+        {{/if}}
+
+        {{!-- Números de página --}}
+        <div class="page-numbers">
+            {{#each (range 1 pagination.totalPages)}}
+                {{#ifEquals this ../pagination.currentPage}}
+                    <span class="page-number current">{{this}}</span>
+                {{else}}
+                    <a href="/students-view?page={{this}}&limit={{../currentLimit}}&sort={{../currentSort}}&query={{../currentQuery}}" 
+                       class="page-number">{{this}}</a>
+                {{/ifEquals}}
+            {{/each}}
+        </div>
+
+        {{!-- Botón Siguiente --}}
+        {{#if pagination.hasNextPage}}
+            <a href="{{pagination.nextUrl}}" class="nav-btn next-btn">
+                Siguiente ➡️
+            </a>
+        {{else}}
+            <span class="nav-btn next-btn disabled">Siguiente ➡️</span>
+        {{/if}}
+    </div>
+    {{/if}}
+</div>
+
+{{!-- ESTILOS CSS ESPECÍFICOS PARA ESTUDIANTES --}}
+<style>
+/* Estadísticas */
+.stats-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+/* Controles */
+.controls-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filter-buttons, .sort-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn, .sort-btn {
+    padding: 0.7rem 1.5rem;
+    border: 2px solid #667eea;
+    color: #667eea;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.filter-btn:hover, .sort-btn:hover,
+.filter-btn.active, .sort-btn.active {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Cards de estudiantes */
+.students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.student-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.student-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.curso-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.curso-inicial { background: #28a745; color: white; }
+.curso-medio { background: #ffc107; color: black; }
+.curso-avanzado { background: #dc3545; color: white; }
+
+.status.active { color: #28a745; }
+.status.inactive { color: #dc3545; }
+
+/* Navegación */
+.pagination-info {
+    text-align: center;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.pagination-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    padding: 0.8rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.nav-btn:hover:not(.disabled) {
+    background: #5a6fd8;
+}
+
+.nav-btn.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.page-number {
+    padding: 0.5rem 1rem;
+    border: 1px solid #667eea;
+    color: #667eea;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.page-number:hover,
+.page-number.current {
+    background: #667eea;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-buttons, .sort-controls {
+        flex-direction: column;
+    }
+    
+    .pagination-navigation {
+        flex-direction: column;
+    }
+    
+    .students-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

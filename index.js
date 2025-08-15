@@ -5,13 +5,31 @@ const CartManager = require('./managers/CartManager');
 const { engine } = require('express-handlebars');
 const { Server } = require('socket.io');
 const http = require('http');
+const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
 const PORT = 8080;
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+    helpers: {
+        ifEquals: function(arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        },
+        range: function(start, end) {
+            const result = [];
+            for (let i = start; i <= end; i++) {
+                result.push(i);
+            }
+            return result;
+        }
+    },
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true,
+        allowProtoMethodsByDefault: true
+    }
+}));
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
@@ -24,13 +42,34 @@ const cartManager = new CartManager('./data/carts.json');
 const viewsRouter = require('./src/routes/views.router');
 const productsRouter = require('./src/routes/products');
 const cartsRouter = require('./src/routes/carts');
+const mongoProductsRouter = require('./src/routes/mongodb.products');
+const mongoUsersRouter = require('./src/routes/mongodb.user');
+const mongoCartsRouter = require('./src/routes/mongodb.carts');
+const studentsRouter = require('./src/routes/students');
 
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
+app.use('/api/mongodb-products', mongoProductsRouter);
+app.use('/api/mongodb-user', mongoUsersRouter);
+app.use('/api/mongodb-carts', mongoCartsRouter);
+app.use('/api/students', studentsRouter);
 
-// Conexión a MongoDB
-mongoose.connect('mongodb://localhost:27017/coder-ecommerce')
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+process.on('uncaughtException', (error) => {
+    console.error('Error no capturado:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Promise rechazada:', reason);
+    process.exit(1);
+});
+
+// Conexión a MongoDB Atlas
+mongoose.connect('mongodb+srv://pdps93:22042483@ppollo.t1gqn93.mongodb.net/coder-ecommerce?retryWrites=true&w=majority&appName=ppollo')
     .then(() => {
         console.log('✅ Conectado a MongoDB');
         // Iniciar servidor solo después de conectar a la base de datos
