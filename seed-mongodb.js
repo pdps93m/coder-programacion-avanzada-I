@@ -22,37 +22,57 @@ async function createSampleProducts() {
     
     const sampleProducts = [
         {
-            title: 'Laptop Gaming',
-            description: 'Laptop para gaming de alta gama',
+            title: 'Laptop Gamer ASUS ROG',
+            description: 'Laptop para juegos de alta gama con RTX 4080, 32GB RAM, procesador Intel i9',
             code: 'LAP001',
-            price: 1500,
+            price: 2499.99,
             status: true,
-            stock: 10,
-            category: 'Electronics',
+            stock: 8,
+            category: 'Computadoras',
             thumbnails: ['laptop1.jpg', 'laptop2.jpg']
         },
         {
-            title: 'Mouse Inalámbrico',
-            description: 'Mouse ergonómico inalámbrico',
+            title: 'Mouse Logitech MX Master 3',
+            description: 'Mouse ergonómico inalámbrico con precisión avanzada y batería de larga duración',
             code: 'MOU001',
-            price: 25,
+            price: 89.99,
             status: true,
-            stock: 50,
-            category: 'Accessories',
+            stock: 25,
+            category: 'Accesorios',
             thumbnails: ['mouse1.jpg']
         },
         {
-            title: 'Teclado Mecánico',
-            description: 'Teclado mecánico RGB',
+            title: 'Teclado Mecánico Corsair K95',
+            description: 'Teclado mecánico RGB con interruptores Cherry MX y teclas programables',
             code: 'KEY001',
-            price: 80,
+            price: 179.99,
             status: true,
-            stock: 30,
-            category: 'Accessories',
-            thumbnails: ['keyboard1.jpg', 'keyboard2.jpg']
+            stock: 15,
+            category: 'Accesorios',
+            thumbnails: ['keyboard1.jpg']
+        },
+        {
+            title: 'iPhone 15 Pro Max',
+            description: 'Teléfono inteligente Apple con procesador A17 Pro, cámara de 48MP, 256GB de almacenamiento y batería de larga duración',
+            code: 'IPH001',
+            price: 1199.99,
+            status: true,
+            stock: 12,
+            category: 'Smartphones',
+            thumbnails: ['iphone1.jpg', 'iphone2.jpg']
+        },
+        {
+            title: 'Samsung Smart TV 65" 4K',
+            description: 'Televisor inteligente 4K Ultra HD de 65 pulgadas con HDR, sistema Tizen y sonido Dolby Digital',
+            code: 'TV001',
+            price: 899.99,
+            status: true,
+            stock: 6,
+            category: 'Televisores',
+            thumbnails: ['tv1.jpg', 'tv2.jpg']
         }
     ];
     
     await Product.insertMany(sampleProducts);
-    console.log('3 productos de prueba insertados');
+    console.log('✅ 5 productos de prueba insertados correctamente');
 }

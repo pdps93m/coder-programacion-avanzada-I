@@ -1,10 +1,18 @@
 <div class="container">
-    <h2>Lista de Productos</h2>
+    {{!-- Header con información del carrito --}}
+    <div class="header-section">
+        <h2>Lista de Productos</h2>
+        <div class="cart-info">
+            <a href="/shop" class="cart-btn">
+                � Ver Mi Carrito (<span id="cartCount">0</span>)
+            </a>
+        </div>
+    </div>
     
     {{#if products.length}}
         <div class="products-grid">
             {{#each products}}
-            <div class="product-card">
+            <div class="product-card" data-id="{{this._id}}">
                 <h3>{{this.title}}</h3>
                 <p class="description">{{this.description}}</p>
                 <div class="product-info">
@@ -13,10 +21,21 @@
                     <span class="category">{{this.category}}</span>
                 </div>
                 <p class="code">Código: {{this.code}}</p>
+                
                 {{#if this.status}}
+                    <div class="product-actions">
+                        <div class="quantity-control">
+                            <button class="qty-btn" onclick="changeQuantity('{{this._id}}', -1)">-</button>
+                            <input type="number" id="qty-{{this._id}}" value="1" min="1" max="{{this.stock}}" class="qty-input">
+                            <button class="qty-btn" onclick="changeQuantity('{{this._id}}', 1)">+</button>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart('{{this._id}}', '{{this.title}}', {{this.price}}, {{this.stock}})">
+                            🛒 Agregar al Carrito
+                        </button>
+                    </div>
                     <span class="status available">Disponible</span>
                 {{else}}
-                    <span class="status unavailable">No disponible</span>
+                    <span class="status unavailable">Sin Stock</span>
                 {{/if}}
             </div>
             {{/each}}
@@ -28,3 +47,231 @@
         </div>
     {{/if}}
 </div>
+
+{{!-- Notificaciones --}}
+<div id="notification" class="notification"></div>
+
+<style>
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.cart-btn {
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.cart-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.qty-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.qty-input {
+    width: 60px;
+    text-align: center;
+    padding: 0.3rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 5px;
+}
+
+.add-to-cart-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.add-to-cart-btn:hover {
+    background: #0056b3;
+}
+
+/* Notificaciones */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    z-index: 1001;
+    display: none;
+}
+
+.notification.success {
+    background: #28a745;
+}
+
+.notification.error {
+    background: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+// Variables globales para el carrito
+let currentCartId = null;
+
+// Inicializar carrito al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCart();
+});
+
+// Inicializar carrito
+async function initializeCart() {
+    try {
+        // Crear un carrito nuevo si no existe
+        const response = await fetch('/api/mongodb-carts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ products: [] })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentCartId = data.payload._id;
+            updateCartDisplay();
+            
+            // Guardar el ID del carrito en localStorage para persistencia
+            localStorage.setItem('cartId', currentCartId);
+        }
+    } catch (error) {
+        console.error('Error inicializando carrito:', error);
+    }
+}
+
+// Cambiar cantidad
+function changeQuantity(productId, change) {
+    const qtyInput = document.getElementById(`qty-${productId}`);
+    let newValue = parseInt(qtyInput.value) + change;
+    const max = parseInt(qtyInput.max);
+    
+    if (newValue < 1) newValue = 1;
+    if (newValue > max) newValue = max;
+    
+    qtyInput.value = newValue;
+}
+
+// Agregar al carrito
+async function addToCart(productId, title, price, stock) {
+    if (!currentCartId) {
+        showNotification('Error: Carrito no inicializado', 'error');
+        return;
+    }
+    
+    const quantity = parseInt(document.getElementById(`qty-${productId}`).value);
+    
+    if (quantity > stock) {
+        showNotification('Cantidad solicitada excede el stock disponible', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/mongodb-carts/${currentCartId}/products/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: quantity })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showNotification(`${title} agregado al carrito`, 'success');
+            updateCartDisplay();
+            // Resetear cantidad a 1
+            document.getElementById(`qty-${productId}`).value = 1;
+        } else {
+            showNotification(data.message || 'Error agregando al carrito', 'error');
+        }
+    } catch (error) {
+        console.error('Error agregando al carrito:', error);
+        showNotification('Error agregando al carrito', 'error');
+    }
+}
+
+// Actualizar display del carrito
+async function updateCartDisplay() {
+    if (!currentCartId) return;
+    
+    try {
+        const response = await fetch(`/api/mongodb-carts/${currentCartId}`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const cart = data.payload;
+            const totalItems = cart.products.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+        }
+    } catch (error) {
+        console.error('Error actualizando display del carrito:', error);
+    }
+}
+
+// Mostrar notificación
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.style.display = 'block';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+</script>

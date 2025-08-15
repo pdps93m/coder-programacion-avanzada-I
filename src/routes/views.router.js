@@ -1,15 +1,16 @@
 const express = require('express');
 const ProductManager = require('../../managers/ProductManager');
-const Product = require('../models/Product'); // ← NUEVO: Importar modelo MongoDB
-const Student = require('../models/Student'); // ← NUEVO: Importar modelo Student
+const Product = require('../models/Product'); // ← Importar modelo MongoDB
+const Estudiante = require('../models/Estudiante'); // ← Importar modelo Estudiante
 
 const router = express.Router();
 const productManager = new ProductManager('./data/products.json');
 
-// GET / - Vista estática de productos (home)
+// GET / - Vista estática de productos usando MongoDB
 router.get('/', async (req, res) => {
     try {
-        const products = await productManager.getProducts();
+        // Obtener productos de MongoDB en lugar del archivo JSON
+        const products = await Product.find({ status: true }).limit(50).lean();
         res.render('home', {
             title: 'Lista de Productos',
             products: products
@@ -36,6 +37,21 @@ router.get('/realtimeproducts', async (req, res) => {
         res.render('realTimeProducts', {
             title: 'Gestión en Tiempo Real',
             products: []
+        });
+    }
+});
+
+// GET /shop - Vista exclusiva del carrito
+router.get('/shop', async (req, res) => {
+    try {
+        // Solo renderizar la vista del carrito sin datos de productos
+        res.render('shop', {
+            title: '� Mi Carrito de Compras'
+        });
+    } catch (error) {
+        console.error('Error en ruta /shop:', error);
+        res.render('shop', {
+            title: '� Mi Carrito de Compras'
         });
     }
 });
@@ -121,8 +137,8 @@ router.get('/products', async (req, res) => {
     }
 });
 
-// GET /students-view - Vista CON PAGINACIÓN de estudiantes (DEMO PRINCIPAL)
-router.get('/students-view', async (req, res) => {
+// GET /vista-estudiantes - Vista CON PAGINACIÓN de estudiantes (DEMO PRINCIPAL)
+router.get('/vista-estudiantes', async (req, res) => {
     try {
         // 📝 PASO 1: Obtener parámetros (misma lógica que API de estudiantes)
         const limit = parseInt(req.query.limit) || 5;    // 5 estudiantes por página
@@ -163,14 +179,14 @@ router.get('/students-view', async (req, res) => {
         }
         
         // 📝 PASO 5: Ejecutar consulta (misma que en API)
-        const students = await Student.find(filter)
+        const estudiantes = await Estudiante.find(filter)
             .sort(sortConfig)
             .skip(skip)
             .limit(limit);
         
         // 📝 PASO 6: Calcular metadatos de paginación
-        const totalStudents = await Student.countDocuments(filter);
-        const totalPages = Math.ceil(totalStudents / limit);
+        const totalEstudiantes = await Estudiante.countDocuments(filter);
+        const totalPages = Math.ceil(totalEstudiantes / limit);
         const hasNextPage = page < totalPages;
         const hasPrevPage = page > 1;
         
@@ -183,19 +199,19 @@ router.get('/students-view', async (req, res) => {
             nextPage: hasNextPage ? page + 1 : null,
             prevPage: hasPrevPage ? page - 1 : null,
             limit,
-            totalStudents,
+            totalStudents: totalEstudiantes,
             // URLs para navegación (manteniendo filtros)
-            nextUrl: hasNextPage ? `/students-view?page=${page + 1}&limit=${limit}&sort=${sort}&query=${query}` : null,
-            prevUrl: hasPrevPage ? `/students-view?page=${page - 1}&limit=${limit}&sort=${sort}&query=${query}` : null,
+            nextUrl: hasNextPage ? `/vista-estudiantes?page=${page + 1}&limit=${limit}&sort=${sort}&query=${query}` : null,
+            prevUrl: hasPrevPage ? `/vista-estudiantes?page=${page - 1}&limit=${limit}&sort=${sort}&query=${query}` : null,
             // URLs para filtros rápidos por curso
-            inicialUrl: `/students-view?page=1&limit=${limit}&sort=${sort}&query=curso:inicial`,
-            medioUrl: `/students-view?page=1&limit=${limit}&sort=${sort}&query=curso:medio`,
-            avanzadoUrl: `/students-view?page=1&limit=${limit}&sort=${sort}&query=curso:avanzado`,
-            todosUrl: `/students-view?page=1&limit=${limit}&sort=${sort}`
+            inicialUrl: `/vista-estudiantes?page=1&limit=${limit}&sort=${sort}&query=curso:inicial`,
+            medioUrl: `/vista-estudiantes?page=1&limit=${limit}&sort=${sort}&query=curso:medio`,
+            avanzadoUrl: `/vista-estudiantes?page=1&limit=${limit}&sort=${sort}&query=curso:avanzado`,
+            todosUrl: `/vista-estudiantes?page=1&limit=${limit}&sort=${sort}`
         };
         
         // 📝 PASO 8: Calcular estadísticas por curso
-        const estadisticas = await Student.aggregate([
+        const estadisticas = await Estudiante.aggregate([
             {
                 $group: {
                     _id: '$curso',
@@ -207,9 +223,9 @@ router.get('/students-view', async (req, res) => {
         ]);
         
         // 📝 PASO 9: Renderizar vista con todos los datos
-        res.render('students', {
+        res.render('estudiantes', {
             title: 'Estudiantes con Paginación',
-            students,
+            estudiantes,
             pagination: paginationData,
             estadisticas,
             currentSort: sort,
@@ -222,10 +238,10 @@ router.get('/students-view', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error en ruta /students-view:', error);
-        res.render('students', {
+        console.error('Error en ruta /vista-estudiantes:', error);
+        res.render('estudiantes', {
             title: 'Estudiantes con Paginación',
-            students: [],
+            estudiantes: [],
             pagination: { totalPages: 0, currentPage: 1 },
             estadisticas: [],
             error: 'Error cargando estudiantes'

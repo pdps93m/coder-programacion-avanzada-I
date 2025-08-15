@@ -23,6 +23,15 @@ app.engine('handlebars', engine({
                 result.push(i);
             }
             return result;
+        },
+        formatDate: function(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            return d.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         }
     },
     runtimeOptions: {
@@ -45,7 +54,7 @@ const cartsRouter = require('./src/routes/carts');
 const mongoProductsRouter = require('./src/routes/mongodb.products');
 const mongoUsersRouter = require('./src/routes/mongodb.user');
 const mongoCartsRouter = require('./src/routes/mongodb.carts');
-const studentsRouter = require('./src/routes/students');
+const estudiantesRouter = require('./src/routes/estudiantes');
 
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
@@ -53,7 +62,7 @@ app.use('/api/carts', cartsRouter);
 app.use('/api/mongodb-products', mongoProductsRouter);
 app.use('/api/mongodb-user', mongoUsersRouter);
 app.use('/api/mongodb-carts', mongoCartsRouter);
-app.use('/api/students', studentsRouter);
+app.use('/api/estudiantes', estudiantesRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
